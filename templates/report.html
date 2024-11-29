@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Recognition Report Generator</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            text-align: center;
+            color: #FFA500;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .generated-output {
+            background-color: #444;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            color: #f0f0f0;
+        }
+        .generated-output h4 {
+            color: #FFA500;
+        }
+        .download-button {
+            text-align: center;
+            margin-top: 20px;
+        }
+        a.button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        a.button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Emotion Recognition Report Generator</h1>
+        
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        {% if summary %}
+            <div class="generated-output">
+                <h4>📝 Summary of Test History:</h4> 
+                <p>{{ summary | safe }}</p>
+                
+                <h4>💼 Emotion Recognition Performance:</h4> 
+                <p>{{ performances | safe }}</p>
+                
+                <h4>⭐ Key Insights and Trends:</h4> 
+                <p>{{ trends | safe }}</p>
+                
+                <h4>✅ Recommendations for Improvement:</h4> 
+                <p>{{ recommendations | safe }}</p>
+            </div>
+
+            <div class="download-button">
+                <a href="{{ url_for('download_report') }}" class="button">📄 Download Final Report</a>
+            </div>
+        {% else %}
+            <div class="generated-output">
+                <p>No report data available. Please try again.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>

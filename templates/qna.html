@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Q&A Test</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background-image: url('/static/css/anxiety.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #fff;
+            padding-bottom: 50px;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 15px 30px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .back-button:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+            transform: scale(1.05);
+        }
+
+        .container {
+            position: relative;
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 10px;
+            box-sizing: border-box;
+        }
+
+        .header-section {
+            width: 100%;
+            text-align: center;
+            padding-top: 60px;
+            margin-bottom: 30px;
+        }
+
+        .content-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+            background-color: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(255, 152, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+
+        .left-section {
+            flex: 1;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(5px);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(255, 152, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .right-section {
+            flex: 1;
+            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(5px);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(255, 152, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .question-number {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .question-text {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .question-image {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .options-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-button {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            background: linear-gradient(45deg, rgba(255, 152, 0, 0.6), rgba(255, 193, 7, 0.6));
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .option-button:hover {
+            background: linear-gradient(45deg, rgba(255, 193, 7, 0.7), rgba(255, 152, 0, 0.7));
+            transform: translateX(5px);
+            box-shadow: 0 2px 10px rgba(255, 152, 0, 0.3);
+        }
+
+        .feedback {
+            width: calc(100% - 30px);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin: 15px 0;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        #next-btn {
+            padding: 15px 40px;
+            font-size: 16px;
+            background: linear-gradient(45deg, #FF9800, #FFC107);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            display: none;
+            margin-top: 20px;
+            align-self: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        #next-btn:hover {
+            background: linear-gradient(45deg, #FFC107, #FF9800);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        #results {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        #results h2 {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        #results p {
+            font-size: 20px;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        #results button {
+            margin: 10px;
+            padding: 15px 40px;
+            font-size: 16px;
+            background: linear-gradient(45deg, #FF9800, #FFC107);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        #results button:hover {
+            background: linear-gradient(45deg, #FFC107, #FF9800);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        h1 {
+            margin: 0 0 20px 0;
+            text-align: center;
+            font-size: 42px;
+            padding-top: 20px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: capitalize;
+            color: #ffffff;
+            text-shadow: 
+                2px 2px 0 #4CAF50,
+                4px 4px 0 rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                circle at center,
+                rgba(255, 255, 255, 0.2) 0%,
+                transparent 70%
+            );
+            z-index: -1;
+        }
+
+        h1::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 4px;
+            background: linear-gradient(45deg, #ffffff, #4CAF50);
+            margin: 15px auto 0;
+            transition: width 0.8s ease;
+            border-radius: 2px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        h1:hover::after {
+            width: 300px;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 2px 2px 0 #4CAF50, 4px 4px 0 rgba(0, 0, 0, 0.2); }
+            50% { text-shadow: 2px 2px 15px #4CAF50, 4px 4px 0 rgba(0, 0, 0, 0.2); }
+        }
+
+        h1:hover {
+            animation: titleGlow 2s infinite;
+        }
+
+        /* Add styles for progress container */
+        .progress-container {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(255, 152, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        .progress-text {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.4);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #FF9800, #FFC107);
+            width: 10%; /* Will be updated via JavaScript */
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-button">Back to Main Page</a>
+        
+        <div class="header-section">
+            <h1>Q&A Test</h1>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-text">Progress: <span id="progress-percentage">10</span>%</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-bar-fill"></div>
+            </div>
+        </div>
+
+        <div class="content-container">
+            <div class="left-section">
+                <div class="question-number">Question <span id="question-number">1</span>/10</div>
+                <div class="question-text">What emotion is shown in this image?</div>
+                <img id="question-image" class="question-image" alt="Emotion Image">
+            </div>
+
+            <div class="right-section">
+                <div class="options-container" id="options"></div>
+                <div id="feedback" class="feedback"></div>
+                <button id="next-btn">Next Question</button>
+            </div>
+        </div>
+
+        <div id="results">
+            <h2>Quiz Complete!</h2>
+            <p>Your score: <span id="score">0</span>/10</p>
+            <button onclick="window.location.href='/dashboard'">View Dashboard</button>
+            <button onclick="resetQuiz()">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = 1;
+        
+        function loadQuestion() {
+            fetch('/get_question')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.complete) {
+                        showResults();
+                        return;
+                    }
+                    
+                    document.getElementById('question-number').textContent = data.question_number;
+                    document.getElementById('question-image').src = data.image_path;
+                    
+                    // Update progress
+                    updateProgress(data.question_number);
+                    
+                    const optionsContainer = document.getElementById('options');
+                    optionsContainer.innerHTML = '';
+                    data.options.forEach(option => {
+                        const button = document.createElement('button');
+                        button.className = 'option-button';
+                        button.textContent = option;
+                        button.onclick = () => checkAnswer(option);
+                        optionsContainer.appendChild(button);
+                    });
+                });
+        }
+
+        function checkAnswer(answer) {
+            fetch('/check_answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ answer: answer })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Disable all option buttons
+                document.querySelectorAll('.option-button').forEach(button => {
+                    button.disabled = true;
+                });
+
+                // Show feedback
+                const feedback = document.getElementById('feedback');
+                feedback.style.display = 'block';
+                if (data.correct) {
+                    feedback.textContent = 'Correct!';
+                    feedback.className = 'feedback correct';
+                } else {
+                    feedback.textContent = `Incorrect! The correct answer was: ${data.correct_answer}`;
+                    feedback.className = 'feedback incorrect';
+                }
+
+                // Show next button if not the last question
+                if (currentQuestion < 10) {
+                    document.getElementById('next-btn').style.display = 'block';
+                } else {
+                    setTimeout(showResults, 1500);
+                }
+            });
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
+            loadQuestion();
+        }
+
+        function showResults() {
+            fetch('/save_quiz_results', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(() => {
+                fetch('/get_score')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('score').textContent = data.score;
+                        document.querySelector('.content-container').style.display = 'none';
+                        document.getElementById('results').style.display = 'block';
+                    });
+            });
+        }
+
+        function resetQuiz() {
+            location.reload();
+        }
+
+        // Make sure the next button has an onclick handler
+        document.getElementById('next-btn').onclick = nextQuestion;
+
+        // Load first question when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadQuestion();
+        });
+
+        function updateProgress(questionNumber) {
+            const percentage = (questionNumber / 10) * 100;
+            document.getElementById('progress-percentage').textContent = percentage;
+            document.getElementById('progress-bar-fill').style.width = percentage + '%';
+        }
+    </script>
+</body>
+</html>
+

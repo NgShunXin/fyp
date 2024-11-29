@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emotion Recognition Training</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(
+                rgba(25, 118, 210, 0.3), 
+                rgba(255, 193, 7, 0.3)
+            ),
+            url("{{ url_for('static', filename='css/joy.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 10px;
+            backdrop-filter: blur(3px);
+            z-index: 1;
+        }
+
+        .header-section {
+            position: relative;
+            width: 100%;
+            text-align: center;
+            padding-top: 80px;
+            margin-bottom: 50px;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 15px 30px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(25, 118, 210, 0.2);
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(25, 118, 210, 0.3);
+        }
+
+        h1 {
+            margin: 0 0 40px 0;
+            text-align: center;
+            font-size: 42px;
+            padding-top: 40px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: capitalize;
+            color: #ffffff;
+            text-shadow: 
+                2px 2px 0 #FF9800,
+                4px 4px 0 rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                circle at center,
+                rgba(255, 255, 255, 0.2) 0%,
+                transparent 70%
+            );
+            z-index: -1;
+        }
+
+        h1::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 4px;
+            background: linear-gradient(45deg, #ffffff, #FFC107);
+            margin: 15px auto 0;
+            transition: width 0.8s ease;
+            border-radius: 2px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        h1:hover::after {
+            width: 300px;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 2px 2px 0 #FF9800, 4px 4px 0 rgba(0, 0, 0, 0.2); }
+            50% { text-shadow: 2px 2px 15px #FF9800, 4px 4px 0 rgba(0, 0, 0, 0.2); }
+        }
+
+        h1:hover {
+            animation: titleGlow 2s infinite;
+        }
+
+        .options-container {
+            display: flex;
+            gap: 40px;
+            margin: 80px auto;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .option-box {
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 20px;
+            text-align: center;
+            width: 300px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                       inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+
+        .option-box:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15),
+                       inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .option-box h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .button {
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 500;
+        }
+
+        .button:hover {
+            background: linear-gradient(45deg, #8BC34A, #4CAF50);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 195, 74, 0.4);
+        }
+
+        .content-layout {
+            display: flex;
+            gap: 30px;
+            margin-top: 40px;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .display-container {
+            width: 500px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 20px;
+            overflow: hidden;
+            display: none;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+
+        .results-container {
+            width: 500px;
+            min-height: 400px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            display: none;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+
+        .emotion-result {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .emotion-label {
+            width: 100px;
+            color: #000000;
+            font-weight: 600;
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            margin: 0 15px;
+            background: rgba(200, 200, 200, 0.5);
+            border-radius: 10px;
+            height: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .emotion-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.8s ease;
+        }
+
+        [data-emotion="anger"] .emotion-bar {
+            background-color: #FF0000;
+        }
+
+        [data-emotion="disgust"] .emotion-bar {
+            background-color: #00FF00;
+        }
+
+        [data-emotion="fear"] .emotion-bar {
+            background-color: #800080;
+        }
+
+        [data-emotion="joy"] .emotion-bar {
+            background-color: #FFD700;
+        }
+
+        [data-emotion="neutral"] .emotion-bar {
+            background-color: #000000;
+        }
+
+        [data-emotion="sadness"] .emotion-bar {
+            background-color: #0000FF;
+        }
+
+        [data-emotion="surprise"] .emotion-bar {
+            background-color: #FF69B4;
+        }
+
+        .percentage {
+            width: 60px;
+            color: #000000;
+            font-weight: 500;
+        }
+
+        .results-container h2 {
+            color: #000000;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .option-box, .display-container, .results-container {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .option-box:hover .button {
+            animation: pulse 1s infinite;
+        }
+
+        .options-container, .content-layout {
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-button">Back to Main Page</a>
+    <div class="container">
+        <div class="header-section">
+            <h1>Emotion Recognition Training</h1>
+        </div>
+        
+        <div class="options-container">
+            <div class="option-box">
+                <h3>Webcam Recognition</h3>
+                <button id="startCamera" class="button">Start Camera</button>
+            </div>
+            
+            <div class="option-box">
+                <h3>Image Upload</h3>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <button id="uploadButton" class="button">Upload Image</button>
+            </div>
+        </div>
+
+        <div class="content-layout">
+            <div class="display-container">
+                <img id="displayImage" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+
+            <div class="results-container">
+                <h3>Emotion Analysis Results:</h3>
+                <div id="emotionResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const startCamera = document.getElementById('startCamera');
+        const uploadButton = document.getElementById('uploadButton');
+        const fileInput = document.getElementById('fileInput');
+        const displayContainer = document.querySelector('.display-container');
+        const displayImage = document.getElementById('displayImage');
+        const resultsContainer = document.querySelector('.results-container');
+        const emotionResults = document.getElementById('emotionResults');
+
+        startCamera.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream.getTracks().forEach(track => track.stop());
+                displayContainer.style.display = 'block';
+                displayContainer.classList.add('webcam-active');
+                displayImage.src = "{{ url_for('video_feed') }}";
+                resultsContainer.style.display = 'none';
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                alert('Error: Please allow camera access to use this feature');
+            }
+        });
+
+        uploadButton.addEventListener('click', () => {
+            displayContainer.classList.remove('webcam-active');
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                displayContainer.style.display = 'block';
+                displayImage.src = URL.createObjectURL(file);
+
+                fetch('/analyze_image', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Received data:', data);
+                    if (data.error) {
+                        console.error('Error:', data.error);
+                        alert('Error analyzing image: ' + data.error);
+                    } else {
+                        resultsContainer.style.display = 'block';
+                        updateEmotionResults(data.emotions);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error analyzing image');
+                });
+            }
+        });
+
+        function updateEmotionResults(emotions) {
+            const emotionColors = {
+                'anger': '#FF0000',    // Red
+                'disgust': '#00FF00',  // Green
+                'fear': '#800080',     // Purple
+                'joy': '#FFD700',      // Gold/Yellow
+                'neutral': '#000000',  // Black
+                'sadness': '#0000FF',  // Blue
+                'surprise': '#FF69B4'  // Hot pink
+            };
+
+            const resultsContainer = document.querySelector('.results-container');
+            resultsContainer.innerHTML = '<h2>Emotion Analysis Results:</h2>';
+
+            Object.entries(emotions).forEach(([emotion, percentage]) => {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'emotion-result';
+                resultDiv.innerHTML = `
+                    <span class="emotion-label">${emotion.charAt(0).toUpperCase() + emotion.slice(1)}</span>
+                    <div class="progress-container">
+                        <div class="emotion-bar" style="width: ${percentage}%; background-color: ${emotionColors[emotion]}"></div>
+                    </div>
+                    <span class="percentage">${percentage.toFixed(1)}%</span>
+                `;
+                resultsContainer.appendChild(resultDiv);
+            });
+        }
+
+        function saveTestResults(results) {
+            fetch('/save_test_result', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(results)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Test results saved successfully');
+                } else {
+                    console.error('Error saving test results:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
