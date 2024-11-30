@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, Response
+from flask import Flask, render_template, request, jsonify, Response, send_file
 from QNA import QNA
 from Emotion_Recognition import EmotionRecognition
 import json
@@ -8,11 +8,13 @@ import cv2
 import numpy as np
 from flask_cors import CORS
 from jamaibase import JamAI, protocol as p
+from Report import Report
 
 app = Flask(__name__)
 CORS(app)
 qna = QNA()
 emotion_recognition = EmotionRecognition()
+report_generator = Report()
 
 # Update credentials
 API_KEY = "jamai_sk_09081aedfccde72a8cfa4bc4db0ff23fa5bd47406c885b77"
@@ -129,7 +131,25 @@ def analyze_image():
 
 @app.route('/report')
 def report():
-    return render_template('report.html')
+    try:
+        # Load test history
+        history = load_history()
+        
+        # Generate report
+        buffer = report_generator.generate_report(history)
+        
+        # Send file
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=report_generator.generate_random_filename(),
+            mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+        
+    except Exception as e:
+        error = f"❌ An error occurred: {str(e)}"
+        print(f"Error details: {str(e)}")
+        return render_template("report.html", error=error)
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -223,4 +243,3 @@ def save_history(history):
 
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1', port=5000)
-
