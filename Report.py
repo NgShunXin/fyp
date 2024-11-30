@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, send_file, jsonify
-from jamai import JamAI, protocol as p
+from jamaibase import JamAI, protocol as p
 import json
 from docx import Document
 from io import BytesIO
@@ -24,39 +24,42 @@ def index():
         # Load test history data from the file
         with open('static/test_history.json', 'r') as file:
             test_history = json.load(file)
+            # Convert the entire test_history to a formatted string
+            test_history_text = json.dumps(test_history, indent=2)
 
-        # Add rows to the existing table with the input data
+        # Add rows to the existing table with the text data
         completion = jamai.add_table_rows(
             "action",
             p.RowAddRequest(
                 table_id="report",
-                data=[{"input": json.dumps(test_history)}],
+                data=[{"input": test_history_text}],  # Pass the text version instead of JSON object
                 stream=False
             )
         )
 
         if completion.rows:
             output_row = completion.rows[0].columns
-            summary = output_row.get("Summary")
-            performances = output_row.get("Performance")
-            trends = output_row.get("Trends")
-            recommendations = output_row.get("Recommendations")
+            # Extract text content from each field
+            summary = output_row.get("Summary", {}).text if output_row.get("Summary") else 'N/A'
+            performances = output_row.get("Performance", {}).text if output_row.get("Performance") else 'N/A'
+            trends = output_row.get("Trends", {}).text if output_row.get("Trends") else 'N/A'
+            recommendations = output_row.get("Recommendations", {}).text if output_row.get("Recommendations") else 'N/A'
 
             # Generate report as DOCX
             doc = Document()
             doc.add_heading("Executive Report", level=1)
 
             doc.add_heading("Summary of Test History", level=2)
-            doc.add_paragraph(summary.text if summary else 'N/A')
+            doc.add_paragraph(summary)
 
             doc.add_heading("Emotion Recognition Performance", level=2)
-            doc.add_paragraph(performances.text if performances else 'N/A')
+            doc.add_paragraph(performances)
 
             doc.add_heading("Key Insights and Trends", level=2)
-            doc.add_paragraph(trends.text if trends else 'N/A')
+            doc.add_paragraph(trends)
 
             doc.add_heading("Recommendations for Improvement", level=2)
-            doc.add_paragraph(recommendations.text if recommendations else 'N/A')
+            doc.add_paragraph(recommendations)
 
             buffer = BytesIO()
             doc.save(buffer)
